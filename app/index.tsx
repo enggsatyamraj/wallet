@@ -1,8 +1,9 @@
 import Wrapper from '@/components/Wrapper';
 import { color } from '@/utils/color';
 import { App_bio, App_name } from '@/utils/const';
+import { useAuth } from '@clerk/clerk-expo';
 import { MaterialIcons } from '@expo/vector-icons';
-import { router } from 'expo-router';
+import { Redirect, router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { Animated, Dimensions, StatusBar, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -11,9 +12,9 @@ const { width } = Dimensions.get('window');
 
 export default function Index() {
     const [fadeAnim] = useState(new Animated.Value(0));
+    const { isSignedIn } = useAuth();
 
     useEffect(() => {
-        // Start the fade-in animation
         Animated.timing(fadeAnim, {
             toValue: 1,
             duration: 800,
@@ -23,10 +24,14 @@ export default function Index() {
         // Navigate after delay
         const timer = setTimeout(() => {
             router.replace('/(auth)/onboarding1')
-        }, 2000); // Show splash for 2 seconds
+        }, 2000);
 
         return () => { clearTimeout(timer) }
     }, []);
+
+    if (isSignedIn) {
+        return <Redirect href={"/(home)"} />
+    }
 
     return (
         <View style={{ flex: 1, backgroundColor: color.white }}>

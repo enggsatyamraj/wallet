@@ -1,6 +1,7 @@
 import { color } from '@/utils/color'
 import { App_name } from '@/utils/const'
 import { MaterialIcons } from '@expo/vector-icons'
+import { router } from 'expo-router'
 import React from 'react'
 import { Dimensions, StatusBar, Text, TouchableOpacity, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
@@ -10,7 +11,7 @@ const { width, height } = Dimensions.get('window')
 export default function Onboarding2() {
     const handleGetStarted = () => {
         // Navigate to the main app
-        // router.replace('/dashboard')
+        router.replace('/loginpage')
     }
 
     return (
