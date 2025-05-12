@@ -1,23 +1,15 @@
-// Google's official color palette for consistent branding across the app
+// Updated color palette with Google-inspired blue and green colors
 
 export const color = {
-    // Primary Google colors
-    primary_blue: "#4285F4",
-    primary_red: "#EA4335",
-    primary_yellow: "#FBBC04",
-    primary_green: "#34A853",
-
-    // Secondary Google colors
-    secondary_blue: "#174EA6", // Darker blue
-    secondary_red: "#A50E0E",  // Darker red
-    secondary_orange: "#E37400", // Orange
-    secondary_green: "#0D652D", // Darker green
+    // Primary colors
+    primary_blue: "#4285F4",      // Google blue
+    primary_green: "#34A853",     // Google green
+    primary_blue_dark: "#3367D6", // Darker blue for contrast
+    primary_green_dark: "#2A8743", // Darker green for contrast
 
     // Light versions of the primary colors
-    light_blue: "#D2E3FC",   // Light blue background
-    light_red: "#FADAD0",    // Light red background
-    light_yellow: "#FEF7E0", // Light yellow background
-    light_green: "#CEEAD6",  // Light green background
+    light_blue: "#E8F0FE",   // Light blue background
+    light_green: "#E6F4EA",  // Light green background
 
     // Neutral/UI colors
     white: "#FFFFFF",
@@ -37,7 +29,17 @@ export const color = {
     background: "#FFFFFF", // Main background
     background_variant: "#F1F3F4", // Alternative background
 
+    // Gradient colors for premium effects
+    gradient_blue_start: "#4285F4",
+    gradient_blue_end: "#3367D6",
+    gradient_green_start: "#34A853",
+    gradient_green_end: "#2A8743",
+
     // Legacy colors (for backward compatibility)
+    primary_red: "#EA4335",      // Keeping for backward compatibility
+    primary_yellow: "#FBBC05",   // Keeping for backward compatibility
+    secondary_blue: "#1A73E8",   // Slightly different Google blue
+    secondary_green: "#188038",  // Slightly different Google green
     primary_bg_color: "#202124", // Updated to Google's black
     card_bg_color: "#FFFFFF",    // Card background
     light_white_color: '#F1F3F4', // Light grey background

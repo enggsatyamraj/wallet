@@ -1,25 +1,36 @@
+import WalletLogo from '@/components/WalletLogo';
 import Wrapper from '@/components/Wrapper';
 import { color } from '@/utils/color';
 import { App_bio, App_name } from '@/utils/const';
 import { useAuth } from '@clerk/clerk-expo';
-import { MaterialIcons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Redirect, router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { Animated, Dimensions, StatusBar, Text, View } from 'react-native';
+import { Animated, Dimensions, StatusBar, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const { width } = Dimensions.get('window');
 
 export default function Index() {
-    const [fadeAnim] = useState(new Animated.Value(0));
+    const [pulseAnim] = useState(new Animated.Value(0));
     const { isSignedIn } = useAuth();
 
     useEffect(() => {
-        Animated.timing(fadeAnim, {
-            toValue: 1,
-            duration: 800,
-            useNativeDriver: true,
-        }).start();
+        // Set up repeating pulse animation for the logo and loading indicator
+        Animated.loop(
+            Animated.sequence([
+                Animated.timing(pulseAnim, {
+                    toValue: 1,
+                    duration: 1000,
+                    useNativeDriver: true,
+                }),
+                Animated.timing(pulseAnim, {
+                    toValue: 0,
+                    duration: 1000,
+                    useNativeDriver: true,
+                })
+            ])
+        ).start();
 
         // Navigate after delay
         const timer = setTimeout(() => {
@@ -34,200 +45,156 @@ export default function Index() {
     }
 
     return (
-        <View style={{ flex: 1, backgroundColor: color.white }}>
+        <View style={styles.container}>
             <StatusBar barStyle="dark-content" backgroundColor={color.white} />
 
-            <SafeAreaView style={{ flex: 1 }}>
-                <Wrapper style={{ flex: 1, justifyContent: 'center', alignItems: "center" }}>
-                    <Animated.View style={{
-                        opacity: fadeAnim,
-                        transform: [{
-                            scale: fadeAnim.interpolate({
-                                inputRange: [0, 1],
-                                outputRange: [0.9, 1]
-                            })
-                        }],
-                        alignItems: 'center'
-                    }}>
-                        {/* Google-style icon */}
-                        <View style={{
-                            width: 96,
-                            height: 96,
-                            borderRadius: 24,
-                            backgroundColor: color.white,
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                            overflow: 'hidden',
-                            position: 'relative',
-                            marginBottom: 24,
-                            elevation: 2,
-                            shadowColor: color.black,
-                            shadowOffset: { width: 0, height: 2 },
-                            shadowOpacity: 0.1,
-                            shadowRadius: 4,
-                        }}>
-                            {/* Top left - Blue */}
-                            <View style={{
-                                position: 'absolute',
-                                top: 0,
-                                left: 0,
-                                width: 48,
-                                height: 48,
-                                backgroundColor: color.primary_blue
-                            }} />
+            <SafeAreaView style={styles.safeArea}>
+                <Wrapper style={styles.wrapper}>
+                    <View style={styles.contentContainer}>
+                        {/* Logo with subtle animation */}
+                        <Animated.View
+                            style={[
+                                styles.logoContainer,
+                                {
+                                    transform: [{
+                                        translateY: pulseAnim.interpolate({
+                                            inputRange: [0, 1],
+                                            outputRange: [0, -3]
+                                        })
+                                    }]
+                                }
+                            ]}
+                        >
+                            <WalletLogo size="large" />
 
-                            {/* Top right - Red */}
-                            <View style={{
-                                position: 'absolute',
-                                top: 0,
-                                right: 0,
-                                width: 48,
-                                height: 48,
-                                backgroundColor: color.primary_red
-                            }} />
+                            {/* Subtle shadow beneath the logo */}
+                            <Animated.View style={[
+                                styles.logoShadow,
+                                {
+                                    opacity: pulseAnim.interpolate({
+                                        inputRange: [0, 1],
+                                        outputRange: [0.15, 0.05]
+                                    }),
+                                    transform: [{
+                                        scale: pulseAnim.interpolate({
+                                            inputRange: [0, 1],
+                                            outputRange: [0.9, 1.05]
+                                        })
+                                    }]
+                                }
+                            ]} />
+                        </Animated.View>
 
-                            {/* Bottom left - Green */}
-                            <View style={{
-                                position: 'absolute',
-                                bottom: 0,
-                                left: 0,
-                                width: 48,
-                                height: 48,
-                                backgroundColor: color.primary_green
-                            }} />
-
-                            {/* Bottom right - Yellow */}
-                            <View style={{
-                                position: 'absolute',
-                                bottom: 0,
-                                right: 0,
-                                width: 48,
-                                height: 48,
-                                backgroundColor: color.primary_yellow
-                            }} />
-
-                            {/* Centered wallet icon */}
-                            <View style={{
-                                backgroundColor: color.white,
-                                width: 52,
-                                height: 52,
-                                borderRadius: 26,
-                                justifyContent: 'center',
-                                alignItems: 'center',
-                                zIndex: 1,
-                                elevation: 1,
-                                shadowColor: color.black,
-                                shadowOffset: { width: 0, height: 1 },
-                                shadowOpacity: 0.1,
-                                shadowRadius: 2,
-                            }}>
-                                <MaterialIcons name="account-balance-wallet" size={30} color={color.primary_blue} />
-                            </View>
-                        </View>
-
-                        {/* App Name */}
-                        <Text style={{
-                            fontSize: 28,
-                            fontWeight: '500',
-                            marginBottom: 8,
-                            color: color.black,
-                            letterSpacing: 0.25
-                        }}>
+                        {/* App Name with premium typographic styling */}
+                        <Text style={styles.appName}>
                             {App_name}
                         </Text>
 
+                        {/* Blue-Green gradient line */}
+                        <View style={styles.gradientLineContainer}>
+                            <LinearGradient
+                                colors={[color.primary_blue, color.primary_green]}
+                                start={{ x: 0, y: 0 }}
+                                end={{ x: 1, y: 0 }}
+                                style={styles.gradientLine}
+                            />
+                        </View>
+
                         {/* App Bio */}
-                        <Text style={{
-                            fontSize: 16,
-                            color: color.grey,
-                            textAlign: 'center',
-                            maxWidth: width * 0.75,
-                            marginBottom: 36,
-                            lineHeight: 22
-                        }}>
+                        <Text style={styles.appBio}>
                             {App_bio}
                         </Text>
 
-                        {/* Loading Indicator */}
-                        <View style={{
-                            flexDirection: 'row',
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                            height: 16
-                        }}>
-                            {/* Animated dots */}
-                            <Animated.View style={{
-                                width: 8,
-                                height: 8,
-                                borderRadius: 4,
-                                backgroundColor: color.primary_blue,
-                                marginHorizontal: 4,
-                                opacity: fadeAnim.interpolate({
-                                    inputRange: [0, 0.2, 0.5, 0.8, 1],
-                                    outputRange: [0.2, 1, 0.2, 0.2, 0.2]
-                                }),
-                                transform: [{
-                                    scale: fadeAnim.interpolate({
-                                        inputRange: [0, 0.2, 0.5, 0.8, 1],
-                                        outputRange: [0.8, 1.2, 0.8, 0.8, 0.8]
-                                    })
-                                }]
-                            }} />
-                            <Animated.View style={{
-                                width: 8,
-                                height: 8,
-                                borderRadius: 4,
-                                backgroundColor: color.primary_red,
-                                marginHorizontal: 4,
-                                opacity: fadeAnim.interpolate({
-                                    inputRange: [0, 0.2, 0.5, 0.8, 1],
-                                    outputRange: [0.2, 0.2, 1, 0.2, 0.2]
-                                }),
-                                transform: [{
-                                    scale: fadeAnim.interpolate({
-                                        inputRange: [0, 0.2, 0.5, 0.8, 1],
-                                        outputRange: [0.8, 0.8, 1.2, 0.8, 0.8]
-                                    })
-                                }]
-                            }} />
-                            <Animated.View style={{
-                                width: 8,
-                                height: 8,
-                                borderRadius: 4,
-                                backgroundColor: color.primary_yellow,
-                                marginHorizontal: 4,
-                                opacity: fadeAnim.interpolate({
-                                    inputRange: [0, 0.2, 0.5, 0.8, 1],
-                                    outputRange: [0.2, 0.2, 0.2, 1, 0.2]
-                                }),
-                                transform: [{
-                                    scale: fadeAnim.interpolate({
-                                        inputRange: [0, 0.2, 0.5, 0.8, 1],
-                                        outputRange: [0.8, 0.8, 0.8, 1.2, 0.8]
-                                    })
-                                }]
-                            }} />
-                            <Animated.View style={{
-                                width: 8,
-                                height: 8,
-                                borderRadius: 4,
-                                backgroundColor: color.primary_green,
-                                marginHorizontal: 4,
-                                opacity: fadeAnim.interpolate({
-                                    inputRange: [0, 0.2, 0.5, 0.8, 1],
-                                    outputRange: [0.2, 0.2, 0.2, 0.2, 1]
-                                }),
-                                transform: [{
-                                    scale: fadeAnim.interpolate({
-                                        inputRange: [0, 0.2, 0.5, 0.8, 1],
-                                        outputRange: [0.8, 0.8, 0.8, 0.8, 1.2]
-                                    })
-                                }]
-                            }} />
+                        {/* Loading indicator with blue color */}
+                        <View style={styles.loadingContainer}>
+                            <Animated.View style={[
+                                styles.loadingDot,
+                                {
+                                    backgroundColor: color.primary_blue,
+                                    opacity: pulseAnim.interpolate({
+                                        inputRange: [0, 0.5, 1],
+                                        outputRange: [0.3, 1, 0.3]
+                                    }),
+                                    transform: [{
+                                        scale: pulseAnim.interpolate({
+                                            inputRange: [0, 0.5, 1],
+                                            outputRange: [0.8, 1, 0.8]
+                                        })
+                                    }]
+                                }
+                            ]} />
                         </View>
-                    </Animated.View>
+                    </View>
                 </Wrapper>
             </SafeAreaView>
         </View>
     )
 }
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: color.white,
+    },
+    safeArea: {
+        flex: 1,
+    },
+    wrapper: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    contentContainer: {
+        alignItems: 'center',
+    },
+    logoContainer: {
+        marginBottom: 24,
+        position: 'relative',
+    },
+    logoShadow: {
+        position: 'absolute',
+        width: 75,
+        height: 12,
+        borderRadius: 50,
+        backgroundColor: color.black,
+        bottom: -12,
+        zIndex: -1,
+        alignSelf: 'center',
+    },
+    appName: {
+        fontSize: 32,
+        fontWeight: '600',
+        color: color.black,
+        letterSpacing: 0.5,
+        marginBottom: 8,
+    },
+    gradientLineContainer: {
+        width: 40,
+        height: 3,
+        marginBottom: 16,
+        overflow: 'hidden',
+        borderRadius: 3,
+    },
+    gradientLine: {
+        height: '100%',
+        width: '100%',
+    },
+    appBio: {
+        fontSize: 16,
+        color: color.grey,
+        textAlign: 'center',
+        maxWidth: width * 0.7,
+        marginBottom: 36,
+        lineHeight: 22,
+    },
+    loadingContainer: {
+        height: 20,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    loadingDot: {
+        width: 8,
+        height: 8,
+        borderRadius: 4,
+    },
+});
