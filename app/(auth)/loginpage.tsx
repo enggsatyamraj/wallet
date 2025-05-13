@@ -1,271 +1,182 @@
-import { color } from '@/utils/color';
-import { useSignIn } from '@clerk/clerk-expo';
-import { MaterialIcons } from '@expo/vector-icons';
-import { router } from 'expo-router';
-import React, { useState } from 'react';
+import WalletLogo from "@/components/WalletLogo";
+import Wrapper from "@/components/Wrapper";
+import { color } from "@/utils/color";
+import { App_name } from "@/utils/const";
+import { LinearGradient } from "expo-linear-gradient";
+import React, { useRef, useState } from "react";
 import {
-    ActivityIndicator,
-    Dimensions,
-    Image,
-    KeyboardAvoidingView,
-    Platform,
-    StatusBar,
+    Animated,
     StyleSheet,
     Text,
     TouchableOpacity,
     View,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-const { width, height } = Dimensions.get('window');
+export default function LoginPage() {
+    const [pulseAnim] = useState(new Animated.Value(0));
+    const [login, setLogin] = useState<any>("login");
+    const translateX = useRef(new Animated.Value(0)).current;
 
-export default function Login() {
-    const { signIn, isLoaded } = useSignIn();
-    const [loading, setLoading] = useState(false);
-
-    // Function to handle Google OAuth
-    const onSignInWithGoogle = async () => {
-        if (!isLoaded) {
-            return;
-        }
-
-        try {
-            setLoading(true);
-
-            // Start the OAuth flow with Google
-            const { createdSessionId, setActive } = await signIn.authenticateWithRedirect({
-                strategy: "oauth_google",
-                redirectUrl: "/",
-                redirectUrlComplete: "/dashboard",
-            });
-
-            if (createdSessionId) {
-                // Set the session active to log in the user
-                await setActive({ session: createdSessionId });
-                router.replace('/(home)');
-            }
-        } catch (err) {
-            console.error("OAuth error", err);
-        } finally {
-            setLoading(false);
-        }
+    const moveRight = () => {
+        Animated.timing(translateX, {
+            toValue: 90,
+            duration: 500,
+            useNativeDriver: true,
+        }).start();
     };
 
+    const moveLeft = () => {
+        Animated.timing(translateX, {
+            toValue: 0,
+            duration: 500,
+            useNativeDriver: true
+        }).start();
+    }
+
+    const handleShowSignup = () => {
+        moveRight();
+        setLogin("signup")
+    }
+
+    const handleShowLogin = () => {
+        moveLeft();
+        setLogin("login");
+    }
+
     return (
-        <View style={styles.container}>
-            <StatusBar barStyle="dark-content" backgroundColor={color.white} />
+        <SafeAreaView style={{ flex: 1 }}>
+            <Wrapper
+                style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+            >
+                <WalletLogo size="large" />
 
-            <SafeAreaView style={styles.safeArea}>
-                <KeyboardAvoidingView
-                    behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-                    style={styles.keyboardView}
+                {/* Subtle shadow beneath the logo */}
+                <Animated.View
+                    style={[
+                        styles.logoShadow,
+                        {
+                            opacity: pulseAnim.interpolate({
+                                inputRange: [0, 1],
+                                outputRange: [0.15, 0.05],
+                            }),
+                            transform: [
+                                {
+                                    scale: pulseAnim.interpolate({
+                                        inputRange: [0, 1],
+                                        outputRange: [0.9, 1.05],
+                                    }),
+                                },
+                            ],
+                        },
+                    ]}
+                />
+                <Text
+                    style={{
+                        fontSize: 32,
+                        fontWeight: "600",
+                        color: color.black,
+                        letterSpacing: 0.5,
+                        marginBottom: 8,
+                    }}
                 >
-                    {/* Google-style logo */}
-                    <View style={styles.logoContainer}>
-                        <View style={styles.logoWrapper}>
-                            {/* Top left - Blue */}
-                            <View style={[styles.logoQuadrant, { top: 0, left: 0, backgroundColor: color.primary_blue }]} />
-                            {/* Top right - Red */}
-                            <View style={[styles.logoQuadrant, { top: 0, right: 0, backgroundColor: color.primary_red }]} />
-                            {/* Bottom left - Green */}
-                            <View style={[styles.logoQuadrant, { bottom: 0, left: 0, backgroundColor: color.primary_green }]} />
-                            {/* Bottom right - Yellow */}
-                            <View style={[styles.logoQuadrant, { bottom: 0, right: 0, backgroundColor: color.primary_yellow }]} />
-
-                            {/* Centered icon */}
-                            <View style={styles.centerIcon}>
-                                <MaterialIcons name="account-balance-wallet" size={24} color={color.primary_blue} />
-                            </View>
-                        </View>
-
-                        <Text style={styles.appName}>Finance Tracker</Text>
-                    </View>
-
-                    <View style={styles.headerContainer}>
-                        <Text style={styles.title}>Welcome</Text>
-                        <Text style={styles.subtitle}>Sign in to continue to your account</Text>
-                    </View>
-
-                    {/* Sign In with Google Button */}
+                    {App_name}
+                </Text>
+                <View style={styles.gradientLineContainer}>
+                    <LinearGradient
+                        colors={[color.primary_blue, color.primary_green]}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 0 }}
+                        style={styles.gradientLine}
+                    />
+                </View>
+                <View
+                    // @ts-ignore
+                    style={{
+                        flexDirection: "row",
+                        width: "200",
+                        // borderWidth: 2,
+                        // borderColor: "red",
+                        // maxWidth: 200,
+                        // paddingHorizontal: 10,
+                        // paddingVertical: 10,
+                        padding: 5,
+                        backgroundColor: "#e8eaed",
+                        borderRadius: 10,
+                        position: "relative",
+                    }}
+                >
                     <TouchableOpacity
-                        style={styles.googleButton}
-                        onPress={onSignInWithGoogle}
-                        disabled={loading}
+                        onPress={handleShowLogin}
+                        style={{
+                            flex: 1,
+                            justifyContent: "center",
+                            alignItems: "center",
+                            padding: 10,
+                            borderRadius: 5,
+                            zIndex: 100,
+                            // backgroundColor: login === 'login' ? "#fff" : 'transparent',
+                        }}
                     >
-                        {loading ? (
-                            <ActivityIndicator color={color.white} size="small" />
-                        ) : (
-                            <>
-                                <Image
-                                    source={require('@/assets/images/flag.png')}
-                                    style={styles.googleLogo}
-                                    resizeMode="contain"
-                                />
-                                <Text style={styles.googleButtonText}>Sign in with Google</Text>
-                            </>
-                        )}
+                        <Text style={styles.heading}>Login</Text>
                     </TouchableOpacity>
 
-                    {/* Divider */}
-                    <View style={styles.dividerContainer}>
-                        <View style={styles.divider} />
-                        <Text style={styles.dividerText}>OR</Text>
-                        <View style={styles.divider} />
-                    </View>
+                    <Animated.View
+                        style={{
+                            width: 100,
+                            backgroundColor: "#fff",
+                            height: "100%",
+                            position: "absolute",
+                            top: 5,
+                            left: 5,
+                            borderRadius: 7,
+                            transform: [{ translateX }],
+                        }}
+                    ></Animated.View>
 
-                    {/* Skip for now button */}
                     <TouchableOpacity
-                        style={styles.skipButton}
-                        onPress={() => router.replace('/(home)')}
+                        onPress={handleShowSignup}
+                        style={{
+                            flex: 1,
+                            padding: 10,
+                            borderRadius: 5,
+                            justifyContent: "center",
+                            alignItems: "center",
+                            // backgroundColor: login === 'signup' ? "#fff" : 'transparent',
+                        }}
                     >
-                        <Text style={styles.skipButtonText}>Skip for now</Text>
+                        <Text style={styles.heading}>Signup</Text>
                     </TouchableOpacity>
-
-                    {/* Terms and Conditions */}
-                    <Text style={styles.termsText}>
-                        By signing in, you agree to our{' '}
-                        <Text style={styles.termsLink}>Terms of Service</Text>{' '}
-                        and{' '}
-                        <Text style={styles.termsLink}>Privacy Policy</Text>
-                    </Text>
-                </KeyboardAvoidingView>
-            </SafeAreaView>
-        </View>
+                </View>
+            </Wrapper>
+        </SafeAreaView>
     );
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: color.white,
+    logoShadow: {
+        position: "absolute",
+        width: 75,
+        height: 12,
+        borderRadius: 50,
+        backgroundColor: color.black,
+        bottom: -12,
+        zIndex: -1,
+        alignSelf: "center",
     },
-    safeArea: {
-        flex: 1,
-    },
-    keyboardView: {
-        flex: 1,
-        padding: 24,
-        justifyContent: 'center',
-    },
-    logoContainer: {
-        alignItems: 'center',
-        marginBottom: 40,
-    },
-    logoWrapper: {
-        width: 80,
-        height: 80,
-        borderRadius: 20,
-        backgroundColor: color.white,
-        justifyContent: 'center',
-        alignItems: 'center',
-        overflow: 'hidden',
-        position: 'relative',
-        shadowColor: color.black,
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-        elevation: 2,
-    },
-    logoQuadrant: {
-        position: 'absolute',
+    gradientLineContainer: {
         width: 40,
-        height: 40,
-    },
-    centerIcon: {
-        backgroundColor: color.white,
-        width: 44,
-        height: 44,
-        borderRadius: 22,
-        justifyContent: 'center',
-        alignItems: 'center',
-        zIndex: 1,
-        shadowColor: color.black,
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.1,
-        shadowRadius: 2,
-        elevation: 1,
-    },
-    appName: {
-        fontSize: 24,
-        fontWeight: '500',
-        color: color.black,
-        marginTop: 16,
-    },
-    headerContainer: {
-        marginBottom: 40,
-    },
-    title: {
-        fontSize: 32,
-        fontWeight: '700',
-        color: color.black,
-        textAlign: 'center',
-        marginBottom: 12,
-    },
-    subtitle: {
-        fontSize: 16,
-        color: color.grey,
-        textAlign: 'center',
-    },
-    googleButton: {
-        flexDirection: 'row',
-        backgroundColor: color.primary_blue,
-        borderRadius: 8,
-        paddingVertical: 14,
-        paddingHorizontal: 24,
-        alignItems: 'center',
-        justifyContent: 'center',
+        height: 3,
         marginBottom: 16,
-        shadowColor: color.black,
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.1,
-        shadowRadius: 2,
-        elevation: 1,
+        overflow: "hidden",
+        borderRadius: 3,
     },
-    googleLogo: {
-        width: 20,
-        height: 20,
-        marginRight: 12,
+    gradientLine: {
+        height: "100%",
+        width: "100%",
     },
-    googleButtonText: {
-        color: color.white,
+    heading: {
         fontSize: 16,
-        fontWeight: '500',
-    },
-    dividerContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginVertical: 24,
-    },
-    divider: {
-        flex: 1,
-        height: 1,
-        backgroundColor: color.divider,
-    },
-    dividerText: {
-        color: color.grey,
-        paddingHorizontal: 16,
-        fontSize: 14,
-    },
-    skipButton: {
-        backgroundColor: color.surface_variant,
-        borderRadius: 8,
-        paddingVertical: 14,
-        alignItems: 'center',
-        marginBottom: 24,
-    },
-    skipButtonText: {
-        color: color.grey,
-        fontSize: 16,
-        fontWeight: '500',
-    },
-    termsText: {
-        fontSize: 12,
-        color: color.grey,
-        textAlign: 'center',
-        lineHeight: 18,
-    },
-    termsLink: {
-        color: color.primary_blue,
-        fontWeight: '500',
+        fontWeight: "500",
     },
 });

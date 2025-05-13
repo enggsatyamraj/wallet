@@ -2,9 +2,9 @@ import WalletLogo from '@/components/WalletLogo';
 import Wrapper from '@/components/Wrapper';
 import { color } from '@/utils/color';
 import { App_bio, App_name } from '@/utils/const';
-import { useAuth } from '@clerk/clerk-expo';
+import { supabase } from '@/utils/supabase';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Redirect, router } from 'expo-router';
+import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { Animated, Dimensions, StatusBar, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -13,7 +13,7 @@ const { width } = Dimensions.get('window');
 
 export default function Index() {
     const [pulseAnim] = useState(new Animated.Value(0));
-    const { isSignedIn } = useAuth();
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         // Set up repeating pulse animation for the logo and loading indicator
@@ -32,16 +32,31 @@ export default function Index() {
             ])
         ).start();
 
-        // Navigate after delay
-        const timer = setTimeout(() => {
-            router.replace('/(auth)/onboarding1')
-        }, 2000);
+        // // Navigate after delay
+        // const timer = setTimeout(() => {
+        //     // router.replace('/(auth)/onboarding1')
+        //     router.replace('/(auth)/loginpage')
+        // }, 2000);
 
-        return () => { clearTimeout(timer) }
+        // return () => { clearTimeout(timer) }
+        checkAuthStatus()
     }, []);
 
-    if (isSignedIn) {
-        return <Redirect href={"/(home)"} />
+    const checkAuthStatus = async () => {
+        setLoading(true)
+        try {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session) {
+                router.replace("/(home)")
+            } else {
+                router.replace("/(auth)/onboarding1")
+            }
+        } catch (err) {
+            console.log("Auth Status failed ")
+            router.replace("/(auth)/loginpage")
+        } finally {
+            setLoading(false)
+        }
     }
 
     return (
@@ -106,24 +121,26 @@ export default function Index() {
                         </Text>
 
                         {/* Loading indicator with blue color */}
-                        <View style={styles.loadingContainer}>
-                            <Animated.View style={[
-                                styles.loadingDot,
-                                {
-                                    backgroundColor: color.primary_blue,
-                                    opacity: pulseAnim.interpolate({
-                                        inputRange: [0, 0.5, 1],
-                                        outputRange: [0.3, 1, 0.3]
-                                    }),
-                                    transform: [{
-                                        scale: pulseAnim.interpolate({
+                        {loading && (
+                            <View style={styles.loadingContainer}>
+                                <Animated.View style={[
+                                    styles.loadingDot,
+                                    {
+                                        backgroundColor: color.primary_blue,
+                                        opacity: pulseAnim.interpolate({
                                             inputRange: [0, 0.5, 1],
-                                            outputRange: [0.8, 1, 0.8]
-                                        })
-                                    }]
-                                }
-                            ]} />
-                        </View>
+                                            outputRange: [0.3, 1, 0.3]
+                                        }),
+                                        transform: [{
+                                            scale: pulseAnim.interpolate({
+                                                inputRange: [0, 0.5, 1],
+                                                outputRange: [0.8, 1, 0.8]
+                                            })
+                                        }]
+                                    }
+                                ]} />
+                            </View>
+                        )}
                     </View>
                 </Wrapper>
             </SafeAreaView>
